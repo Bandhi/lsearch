@@ -1,0 +1,88 @@
+.map {
+   position: absolute;
+   width: 100%;
+   height: 600px;
+   border:#555555 2px solid;
+}
+
+#demo{
+	width: 100%;
+	height: 80vh;
+	background-image: url('http://www.wallpaperup.com/uploads/wallpapers/2012/09/30/17485/big_thumb_b21255ebd4cf764269b8778a316c190a.jpg');
+	background-size: cover;
+	margin-bottom: 20px;
+}
+
+#deadman{
+	padding-left: 50px;
+}
+
+#directionsItinerary {
+	padding-left: 60px;
+}
+
+.MapPic{
+  border:#555555 2px solid;
+}
+
+.yelpData {
+	padding-top: 610px;
+}
+
+.ML {
+	padding-top: 600px;
+}
+
+body {
+  padding-top: 30px;
+  /*padding-top: 50px;*/
+}
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+}
+
+body {
+	font-family: Ubuntu, monospace, sans-serif;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+nav {
+	font-size: 18px;
+}
+
+h1 {
+	text-align: center;
+	text-decoration: bold;
+	/* text-shadow: #000080 1px -1px 1px; */
+	font-size: 72px;
+}
+
+h2 {
+	text-align: center;
+	text-decoration: bold;
+	font-size: 36px;
+}
+
+p {
+	text-align: left;
+	font-family: 'Whitney SSm A', sans-serif;
+	padding-left: 9.5px;
+	font-size: 12px;
+}
+
+h3 {
+  line-height: 2em;
+}
+
+#wide {
+	width: 100%;
+	height: 100vh;
+	background-image: url('http://i.imgur.com/Ruhl4ln.jpg');
+	background-size: cover;
+	margin-bottom: 20px;
+}

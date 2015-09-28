@@ -1,0 +1,305 @@
+<head>
+    <title>InSearch</title>
+    <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+	<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<link rel="shortcut icon" href="D6BJIbqs.ico" type="image/x-icon"/>
+	<link rel="stylesheet" href="bootstrap.css">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-CtDjPgM1G0DtA1_r1G2gzsNph5baT5U"></script>
+    <script type="text/javascript">
+        var map = null;
+        var directionsManager;
+        var directionsErrorEventObj;
+        var directionsUpdatedEventObj;
+        var geocoder;
+		var mlearndata;
+		var lat1;
+		var long1;
+		var lat0;
+		var long0;
+        var YWSID = "Xt6lpod8cLRP7DS-d8t1AQ";
+		var URL = "";
+		var addresses = [];
+		var pushpins = [];
+		var pushpinsC = [];
+		var business = [];
+		var displayEventInfos = [];
+		var debug;
+		var mouseI = 0;
+		var searched;
+
+        function getMap() {
+            map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+                credentials: "AlbkhijRyecFbqHddipw5xtcIZ8DFv90OhtgulGXDM0pJ7lcwpkdpuIwTdYxtMa6"
+            });
+			geocoder = new google.maps.Geocoder();
+        }
+		
+		function mouseTest(e) {
+			document.getElementById('upmate').innerHTML = "<h2><a href=\"" + business[mouseI].url + "\">" + business[mouseI].name + "</a><center><img src=" + business[mouseI].photo_url + 
+				"></center></h2><br><img src=" + business[mouseI].rating_img_url + "><br>" + business[mouseI].address1 + ", " + 
+				business[mouseI].city + ", " + business[mouseI].state + " " + business[mouseI].zip;
+			mouseI = mouseI + 1;
+		}
+		
+        function handler(data) {
+			var i;
+			var j;
+			for (j = 0; j < data.businesses.length; j++) {
+				business.push(data.businesses[j]);
+			}
+			for (i = 0; i < data.businesses.length; i++) {
+				business.push(data.businesses[i]);
+				var tmp = data.businesses[i].address1 + ", " + data.businesses[i].city + ", " + data.businesses[i].state + " " + data.businesses[i].zip;
+				addresses.push(tmp);
+				geocoder.geocode({
+					'address': tmp
+				}, function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						var pushpin = new Microsoft.Maps.Pushpin(map.getCenter(), null);
+						var pushpinClick= Microsoft.Maps.Events.addHandler(pushpin, 'mouseover', mouseTest);
+						map.entities.push(pushpin);
+						console.log(results[0].geometry.location.lat().toString() + " " + results[0].geometry.location.lng().toString());
+						pushpin.setLocation(new Microsoft.Maps.Location(parseFloat(results[0].geometry.location.lat().toString()), parseFloat(results[0].geometry.location.lng().toString())));
+						pushpinsC.push(pushpinClick);
+						pushpins.push(pushpin);
+					} else {
+						document.getElementById('updates').innerHTML = "Geocode was not successful for the following reason: " + status;
+					}
+				});
+			}
+			var cool = Math.floor((Math.random() * data.businesses.length));
+			modDrivingRoute(data.businesses[cool].address1 + ", " + data.businesses[cool].city + ", " + data.businesses[cool].state + " " + data.businesses[cool].zip);
+        }
+		
+        function createDirectionsManager() {
+            if (!directionsManager) {
+                directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
+                document.getElementById('updates').innerHTML = 'Directions Module loaded';
+            }
+            directionsManager.resetDirections();
+            directionsErrorEventObj = Microsoft.Maps.Events.addHandler(directionsManager, 'directionsError', function(arg) {
+                document.getElementById('updates').innerHTML = arg.message;
+            });
+            directionsUpdatedEventObj = Microsoft.Maps.Events.addHandler(directionsManager, 'directionsUpdated', function() {
+                document.getElementById('updates').innerHTML = 'Directions updated';
+            });
+        }
+		
+		function modDrivingRoute(x) {
+			if (!directionsManager) {
+                createDirectionsManager();
+            }
+            directionsManager.resetDirections();
+            // Set Route Mode to driving
+            // can have different options
+            directionsManager.setRequestOptions({
+                routeMode: Microsoft.Maps.Directions.RouteMode.driving
+            });
+            var seattleWaypoint = new Microsoft.Maps.Directions.Waypoint({
+                address: document.getElementsByName("start")[0].value
+            });
+            directionsManager.addWaypoint(seattleWaypoint);
+            var mid = new Microsoft.Maps.Directions.Waypoint({
+                address: x
+            });
+            directionsManager.addWaypoint(mid);
+			var tacomaWaypoint = new Microsoft.Maps.Directions.Waypoint({
+                address: document.getElementsByName("end")[0].value
+            });
+            directionsManager.addWaypoint(tacomaWaypoint);
+            // Set the element in which the itinerary will be rendered
+            directionsManager.setRenderOptions({
+                itineraryContainer: document.getElementById('directionsItinerary')
+            });
+            document.getElementById('updates').innerHTML = 'Calculating directions...';
+            directionsManager.calculateDirections();
+            geocoder.geocode({
+                'address': document.getElementsByName("start")[0].value
+            }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat1 = parseFloat(results[0].geometry.location.lat().toString());
+					long1 = parseFloat(results[0].geometry.location.lng().toString());
+					lat0 = lat1;
+					long0 = long1;
+					//console.log(lat1 + " " + long1);
+                } else {
+					//console.log(status);
+                    document.getElementById('updates').innerHTML = "Geocode was not successful for the following reason: " + status;
+                }
+            });
+		}
+        
+		function createDrivingRoute() {
+            if (!directionsManager) {
+                createDirectionsManager();
+            }
+            directionsManager.resetDirections();
+            // Set Route Mode to driving
+            // can have different options
+            directionsManager.setRequestOptions({
+                routeMode: Microsoft.Maps.Directions.RouteMode.driving
+            });
+            var seattleWaypoint = new Microsoft.Maps.Directions.Waypoint({
+                address: document.getElementsByName("start")[0].value
+            });
+            directionsManager.addWaypoint(seattleWaypoint);
+            var tacomaWaypoint = new Microsoft.Maps.Directions.Waypoint({
+                address: document.getElementsByName("end")[0].value
+            });
+            directionsManager.addWaypoint(tacomaWaypoint);
+            // Set the element in which the itinerary will be rendered
+            directionsManager.setRenderOptions({
+                itineraryContainer: document.getElementById('directionsItinerary')
+            });
+            document.getElementById('updates').innerHTML = 'Calculating directions...';
+            directionsManager.calculateDirections();
+            geocoder.geocode({
+                'address': document.getElementsByName("start")[0].value
+            }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat1 = parseFloat(results[0].geometry.location.lat().toString());
+					long1 = parseFloat(results[0].geometry.location.lng().toString());
+					lat0 = lat1;
+					long0 = long1;
+					//console.log(lat1 + " " + long1);
+                } else {
+					//console.log(status);
+                    document.getElementById('updates').innerHTML = "Geocode was not successful for the following reason: " + status;
+                }
+            });
+			geocoder.geocode({
+                'address': document.getElementsByName("end")[0].value
+            }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat1 = lat1 + parseFloat(results[0].geometry.location.lat().toString());
+					long1 = long1 + parseFloat(results[0].geometry.location.lng().toString());
+                } else {
+                    document.getElementById('updates').innerHTML = "Geocode was not successful for the following reason: " + status;
+                }
+            });
+        }
+		
+		function yelp() {
+			getlabel(document.getElementsByName("search")[0].value);
+			URL = "http://api.yelp.com/" +
+				"business_review_search?" +
+				"callback=" + "handler" +
+				"&term=" + "food" +
+				"&lat=" + (lat1/2) +
+				"&long=" + (long1/2) +
+				"&limit=" + "3" +
+				//"&radius=" + Math.sqrt(Math.pow(lat1/2 - lat0, 2) + Math.pow(long1/2 - long0, 2)) +
+				"&radius=" + "2" +
+				"&category=" + searched.label +
+				"&ywsid=" + YWSID;
+			var script = document.createElement('script');
+            script.src = URL;
+            script.type = 'text/javascript';
+            var head = document.getElementsByTagName('head').item(0);
+            head.appendChild(script);
+			document.getElementById('ML').innerHTML = "Result Produced by ML: " + searched.label + ", with a probability of " + searched.probability;
+		}
+
+        function createDirections() {
+            if (!directionsManager) {
+                Microsoft.Maps.loadModule('Microsoft.Maps.Directions', {
+                    callback: createDrivingRoute
+                });
+            } else {
+                createDrivingRoute();
+            }
+        }
+		
+		//don't overuse
+		function getlabel(word) {
+			$.ajax({
+				url : "https://api.monkeylearn.com/v2/classifiers/cl_pvpmJjX2/classify/?sandbox=1",
+				type : "POST",
+				headers: {
+					"Authorization": "token acfbb6c3590e875d9431f1cd4a056b06db3fdb71",
+				},
+				dataType: "json",
+				contentType: "application/json; charset=utf-8",
+				data : JSON.stringify({
+				  text_list: [word]
+				}),
+				success : function(result) {
+				  mlearndata = result;
+				  //add whatever
+				  searched = mlearndata.result[0][0];
+				  //console.log(mlearndata.result[0][0].label);
+				},
+				error : function(e) {
+				  document.getElementById('updates').innerHTML = 'Error (MonkeyLearn): ' + e;
+				}
+			});
+		}
+    </script>
+
+</head>
+
+<body onload="getMap();">
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        	<ul class="nav navbar-nav navbar-left">
+        		<li><strong><a class="navbar-brand" href="/">Top</a></strong></li>
+        	</ul>
+		<ul class="nav navbar-nav navbar-right">
+        		<li><a href="#how">How</a></li>
+        		<li><a href="#demo">Demo</a></li>
+				<li>...</li>
+        	</ul>
+	</nav>
+	<div id="wide" class="row">
+		<h1>InSearch</h1>
+		<div class="row-fluid">
+			<div class="col-md-1"></div>
+			<div class="col-md-5"><h3>An innovative app that helps you find food in between you and your destination using Microsoft's Bing Map API, Google's Geocoding API, Yelp's Location API, and MonkeyLearn.</h3></div>
+			<div class="col-md-6"><img src="http://i.imgur.com/ObG54Lz.png" class="MapPic"></div>
+		</div>
+	</div>
+	<div id="how" class="row">
+		<h1>How does this work?</h1>
+		<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-6"><h3>Mircosoft's Bing Map API shows us a beautiful map and calculates directions to and from your destination by talking to the MeteorJS client through the JavaScript, then gives you real time updates.</h3></div>
+		<div class="col-md-5"><center><img src="http://i.imgur.com/ELne5jX.png"></center></div>
+		</div>
+		<div class="row">
+			<div class="col-md-1"></div>
+			<div class="col-md-6"><h3>The searching has two essential steps. First, we process the search request by my MonkeyLearn module. I trained the module through scraping the web for dish names then added samples to each of the categories. After training it with a a large csv file, using the Multinomial Naive Bayes Classifier Algorithm, it produces statistics. Then, it passes the result to Yelp and using Google's Geocoding API, it plots the data points.</h3></div>
+			<div class="col-md-5"><center><img src="http://i.imgur.com/0Tft6ja.png"></center></div>
+		</div>
+	</div>
+	<div class="row" id="demo">
+		<h1>Demo</h1>
+		<div class="col-md-1"></div>
+		<div class="col-md-7">
+			<input type="text" name="start" placeholder="Start" class="form-control input-lg">
+                <br><br>
+			<input type="text" name="end" placeholder="End" class="form-control input-lg">
+				<br>
+			<input type="button" class="btn btn-primary" value="CreateDrivingRoute" onclick="$('#directionsItinerary').empty();createDirections();" />
+                <br><br><br>
+			<input type="text" name="search" placeholder="Search v1" class="form-control input-lg">
+				<br>
+			<input type="button" class="btn btn-primary" value="Search" onclick="yelp();" />
+		</div>
+		<div class="col-md-4"></div>
+	</div>
+	<div class="row">
+        <div class="row" id="deadman">
+            <div id='updates'></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6" id="deadman">
+                <div id='myMap' class='map'></div>
+				<div id='ML'></div>
+				<div id='upmate' class='yelpData'></div>
+            </div>
+            <div class="col-md-6">
+                <div id='directionsItinerary'><h2>Directions will go here.</h2></div>
+            </div>
+        </div>
+    </div>
+</body>
